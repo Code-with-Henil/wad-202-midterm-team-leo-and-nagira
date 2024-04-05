@@ -1,0 +1,11 @@
+{
+  "name": "wad-202-midterm-team-leo-and-nagira",
+  "version": "1.0.0",
+  "description": "MidTerm project",
+  "main": "index.js",
+  "scripts": {
+    "styles" : "sass --watch --update --style=expanded index.sass index.css"
+  },
+  "author": "Leo and Nagira",
+  "license": "ISC"
+}
