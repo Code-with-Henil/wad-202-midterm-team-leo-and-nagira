@@ -1,9 +1,44 @@
 <!DOCTYPE html>
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Weather App</title>
     <link rel="stylesheet" href="index.css" />
 </head>
 <body>
+    <main>
+        <div class="filter-search">
+            <select id="favorite-cities">
+                <option value="" disabled selected>Favorite Cities</option>            
+            </select>
+            <h3 class="mobile">OR</h3>
+            <input type="search" id="search" placeholder="Search Bar (Cities)"/>
+        </div>
+        <h3>Current Weather</h3>
+        <section class="current-weather">
+            <div class="header">
+                <h2 id="city-name">City Name</h2>
+                <object id="star" data="StarEmpty.svg"></object>
+            </div>
+            <h2 id="city-temp">#22 C</h2>
+            <div class="weather-card"></div>
+        </section>
+        <h3>Daily Forecast - 5 Days</h3>
+        <section class="daily-forecast">
+            <div class="day-card">Day 1</div>
+            <div class="day-card">Day 2</div>
+            <div class="day-card">Day 3</div>
+            <div class="day-card">Day 4</div>
+            <div class="day-card">Day 5</div>
+        </section>
+        <h3>3 Hour Range</h3>
+        <section class="hour-range">
+            <div class="hour-card">0 - 3</div>
+            <div class="hour-card">0 - 3</div>
+            <div class="hour-card">0 - 3</div>
+            <div class="hour-card">0 - 3</div>
+            <div class="hour-card">0 - 3</div>
+        </section>
+    </main>
     <script src="index.js" async defer></script>
 </body>
 </html>
