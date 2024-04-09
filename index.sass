@@ -1,4 +1,70 @@
+$gray-color: #767676
+$mobileSize: 450px
+
 *
     margin: 0
     padding: 0
     box-sizing: border-box
+
+main
+    padding: 20px
+    font-family: Cambria
+    font-size: 16px
+    display: flex
+    flex-direction: column
+    gap: 10px
+    .mobile
+        display: none
+    h3
+        color: $gray-color
+        margin-top: 10px
+    section
+        display: flex
+        border: solid 1px $gray-color
+        border-radius: 10px
+        padding: 10px
+        gap: 10px
+    section.daily-forecast
+        justify-content: space-evenly
+        flex-wrap: wrap
+        .day-card
+            padding: 5vh 5vw
+            border: solid 1px $gray-color
+    section.hour-range
+        justify-content: space-evenly
+        flex-wrap: wrap
+        .hour-card
+            padding: 5vh 5vw
+            border: solid 1px $gray-color
+    section.current-weather
+        flex-direction: column
+        align-items: center
+        div.header
+            display: flex
+            object
+                margin-left: 10px
+        div.weather-card
+            background-color: $gray-color
+            padding: 20px
+            width: 50vw
+            height: 30vh
+    div.filter-search
+        display: flex
+        justify-content: space-between
+        align-items: center
+        input, select
+            color: $gray-color
+            min-width: 200px
+            width: 20vw
+            padding: 5px 10px
+
+@media screen and (min-width: 100px) and (max-width: $mobileSize)
+    .mobile
+        display: block !important
+    div.filter-search > input, select 
+        width: auto !important
+        min-width: auto !important
+    section.current-weather
+        div.weather-card
+            width: 100% !important
+            height: 30vh !important
