@@ -1,17 +1,17 @@
-const textInput = document.getElementById('search');
-const cityNameElem = document.getElementById('city-name');
-const cityTempElem = document.getElementById('city-temp');
-const weatherCard = document.querySelector('.weather-card')
+const WEATHER_API_KEY = '7580fc23fe1e90bf9284522f40ed7c07';
+const FavoriteList = [];
 
-textInput.addEventListener("input", (e) => {
-    const city = e.target.value;
-    weatherData(city)
-});
+init();
+
+function init(){
+    document.getElementById('star').addEventListener("click", handleLikeButton, false);
+    document.getElementById('favorite-cities').addEventListener("change", handleChangeCity, false);
+    document.getElementById('search').addEventListener("input", (e) => { const city = e.target.value; weatherData(city) });
+}
 
 async function weatherData(city) {
-    const apiKey = 'e976593d6b7656dacbb71907dd812af8'; 
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`;
-
+    markStar(false);
+    const url = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=${city}&appid=${WEATHER_API_KEY}`;
 
     try {
         const res = await fetch(url);
@@ -21,6 +21,8 @@ async function weatherData(city) {
         }
 
         const data = await res.json();
+        const cityName = document.getElementById('city-name');
+        cityName.innerText = city;
         displayWeather(data)
     }
     catch(error) {
@@ -29,11 +31,20 @@ async function weatherData(city) {
 }
 
 function displayWeather(data) {
+    const CELSIUS_TEMP = '°C'
+    const PERCENT = '%'
+    const PRESSURE = 'ATM'
+    const cityNameElem = document.getElementById('city-name');
+    const cityTempElem = document.getElementById('city-temp');
+    const weatherCard = document.querySelector('.weather-card')
 
-    const cityTemp = Math.round(data.main.temp - 273.15)
+    const cityTemp = data.main.temp;
     const condition = data.weather[0].main;
     const iconCode = data.weather[0].icon;
     const iconUrl = `http://openweathermap.org/img/w/${iconCode}.png`;
+
+    const cityTempObj = document.getElementById('city-temp');
+    cityTempObj.innerText = `${cityTemp} ${CELSIUS_TEMP}`
     
     const details = `
     <div class="weather-details">
@@ -41,27 +52,29 @@ function displayWeather(data) {
         <img src="${iconUrl}" alt="${condition}" />
     </div>
     `
-    
 
     cityNameElem.textContent = data.name;
-    cityTempElem.textContent = `${cityTemp} °C`
+    cityTempElem.textContent = `${cityTemp} ${CELSIUS_TEMP}`
     weatherCard.innerHTML = details;
 
+    let statList = {
+        feels_like: CELSIUS_TEMP,
+        humidity:  PERCENT,
+        pressure:  PRESSURE,
+        temp_max:  CELSIUS_TEMP,
+        temp_min:  CELSIUS_TEMP
+    };
+    for(let stat in statList){
+        console.log(stat);
+        const pElement = document.createElement('p');
+        const bElement = document.createElement('b');
+        bElement.innerText = stat.replace('_',' ') + ' :';
+        pElement.innerText = `${data.main[stat]} ${statList[stat]}`;
+        pElement.insertBefore(bElement, pElement.firstChild);
+        weatherCard.appendChild(pElement);
+    }
 }
-const WEATHER_API_KEY = '7580fc23fe1e90bf9284522f40ed7c07';
-const CELSIUS_TEMP = '°C'
-const PERCENT = '%'
-const PRESSURE = 'ATM'
 
-const FavoriteList = [];
-
-init();
-
-function init(){
-    document.getElementById('star').addEventListener("click", handleLikeButton, false);
-    document.getElementById('favorite-cities').addEventListener("change", handleChangeCity, false);
-    //fillSearchData();
-}
 
 function handleChangeCity(){
     let favoriteSelect = document.getElementById('favorite-cities');
@@ -107,34 +120,3 @@ function handleLikeButton(){
         removeCity(cityName);
 }
 
-function searchCurrentWeatherByLatLon(lat, lon){
-    return fetch(`https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`)
-    .then( async (response)=>{
-        return await response.json();
-    });
-}
-
-async function fillSearchData(){
-    const currentWeather = document.getElementById('currentWeather');
-    let data = await searchCurrentWeatherByLatLon(49.2029498,-122.9176569);
-    console.log(data);
-    const cityName = document.getElementById('city-name');
-    const cityTemp = document.getElementById('city-temp');
-    cityTemp.innerText = `${data.main.temp} ${CELSIUS_TEMP}`
-    let statList = {
-        feels_like: CELSIUS_TEMP,
-        humidity:  PERCENT,
-        pressure:  PRESSURE,
-        temp_max:  CELSIUS_TEMP,
-        temp_min:  CELSIUS_TEMP
-    };
-    for(let stat in statList){
-        console.log(stat);
-        const pElement = document.createElement('p');
-        const bElement = document.createElement('b');
-        bElement.innerText = stat.replace('_',' ') + ' :';
-        pElement.innerText = `${data.main[stat]} ${statList[stat]}`;
-        pElement.insertBefore(bElement, pElement.firstChild);
-        currentWeather.appendChild(pElement);
-    }
-}
