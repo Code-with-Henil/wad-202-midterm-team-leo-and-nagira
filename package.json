@@ -6,6 +6,6 @@
   "scripts": {
     "styles" : "sass --watch --update --style=expanded index.sass index.css"
   },
-  "author": "Leo and Nagira",
+  "author": "Leo, Nagira and Marco",
   "license": "ISC"
 }
