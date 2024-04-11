@@ -7,6 +7,15 @@ function init(){
     document.getElementById('star').addEventListener("click", handleLikeButton, false);
     document.getElementById('favorite-cities').addEventListener("change", handleChangeCity, false);
     document.getElementById('search').addEventListener("input", (e) => { const city = e.target.value; weatherData(city) });
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(handlePosition);
+    } else {
+        handlePosition({ coords: { latitude: 49.2578181, longitude: -123.2064763 } });
+    }
+}
+
+function handlePosition(position) {
+    console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
 }
 
 async function weatherData(city) {
