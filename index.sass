@@ -41,13 +41,21 @@ main
         align-items: center
         div.header
             display: flex
-            object
+            .btn
                 margin-left: 10px
         div.weather-card
+            display: flex
+            flex-direction: column
             background-color: $gray-color
+            border-radius: 10px
             padding: 20px
             width: 50vw
-            height: 30vh
+            p
+                display: flex
+                justify-content: space-between
+                color: #FFF
+
+
     div.filter-search
         display: flex
         justify-content: space-between

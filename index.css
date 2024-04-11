@@ -49,14 +49,21 @@ main section.current-weather {
 main section.current-weather div.header {
   display: flex;
 }
-main section.current-weather div.header object {
+main section.current-weather div.header .btn {
   margin-left: 10px;
 }
 main section.current-weather div.weather-card {
+  display: flex;
+  flex-direction: column;
   background-color: #767676;
+  border-radius: 10px;
   padding: 20px;
   width: 50vw;
-  height: 30vh;
+}
+main section.current-weather div.weather-card p {
+  display: flex;
+  justify-content: space-between;
+  color: #FFF;
 }
 main div.filter-search {
   display: flex;

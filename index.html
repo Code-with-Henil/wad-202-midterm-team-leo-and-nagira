@@ -8,7 +8,7 @@
     <main>
         <div class="filter-search">
             <select id="favorite-cities">
-                <option value="" disabled selected>Favorite Cities</option>            
+                <option value="-1" disabled selected>Favorite Cities</option>            
             </select>
             <h3 class="mobile">OR</h3>
             <input type="search" id="search" placeholder="Search Bar (Cities)"/>
@@ -16,11 +16,14 @@
         <h3>Current Weather</h3>
         <section class="current-weather">
             <div class="header">
-                <h2 id="city-name">City Name</h2>
-                <object id="star" data="StarEmpty.svg"></object>
+                <h2 id="city-name">Search for a City</h2>
+                <div id="star" class="btn">
+                    <img src="StarEmpty.svg" />
+                </div>
             </div>
-            <h2 id="city-temp">#22 C</h2>
-            <div class="weather-card"></div>
+            <h2 id="city-temp"></h2>
+            <div id="currentWeather" class="weather-card">
+            </div>
         </section>
         <h3>Daily Forecast - 5 Days</h3>
         <section class="daily-forecast">

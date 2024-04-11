@@ -4,8 +4,11 @@
   "description": "MidTerm project",
   "main": "index.js",
   "scripts": {
-    "styles" : "sass --watch --update --style=expanded index.sass index.css"
+    "styles": "sass --watch --update --style=expanded index.sass index.css"
   },
   "author": "Leo and Nagira",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "sass": "^1.74.1"
+  }
 }
