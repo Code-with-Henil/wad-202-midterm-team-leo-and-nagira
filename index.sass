@@ -1,4 +1,5 @@
 $gray-color: #767676
+$gray-transparent-color: #7676763F
 $mobileSize: 450px
 
 *
@@ -39,6 +40,8 @@ main
     section.current-weather
         flex-direction: column
         align-items: center
+        background: #000
+        color: #FFF
         div.header
             display: flex
             .btn
@@ -46,14 +49,13 @@ main
         div.weather-card
             display: flex
             flex-direction: column
-            background-color: $gray-color
+            background-color: $gray-transparent-color
             border-radius: 10px
             padding: 20px
             width: 50vw
             p
                 display: flex
                 justify-content: space-between
-                color: #FFF
 
 
     div.filter-search

@@ -1,26 +1,101 @@
 const WEATHER_API_KEY = '7580fc23fe1e90bf9284522f40ed7c07';
-const FavoriteList = [];
+const MAPS_API_KEY = 'AIzaSyBRkS6cEpnprcg3umZ4cjahxJ62aO5-Dd4';
+let Current_Place_Id;
 
 init();
 
 function init(){
-    document.getElementById('star').addEventListener("click", handleLikeButton, false);
-    document.getElementById('favorite-cities').addEventListener("change", handleChangeCity, false);
-    document.getElementById('search').addEventListener("input", (e) => { const city = e.target.value; weatherData(city) });
+    document.getElementById('star').addEventListener("click", handleLikeButton);
+    document.getElementById('favorite-cities').addEventListener("change", handleChangeCity);
+    document.getElementById('search').addEventListener("input", handleAutocomplete);
+    document.getElementById('search').addEventListener("change", handleSearch);
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(handlePosition);
     } else {
         handlePosition({ coords: { latitude: 49.2578181, longitude: -123.2064763 } });
     }
+    localStorage.clear();
+}
+
+function handleAutocomplete(e){
+    const city = e.target.value; 
+    if(city.length > 3){
+        googleAutoComplete(city);
+    }
+}
+
+function handleSearch(){
+    let searchObj = document.getElementById('search');
+    const cityName = document.getElementById('city-name');
+    cityName.innerText = searchObj.value;
+    markStar(localStorage.getItem(searchObj.value) != undefined);
+        
+    let citiesList = Array.from(document.getElementById('cities-list').children);
+    var optionObj = citiesList.find((x)=> x.value == searchObj.value);
+    if(optionObj == null){
+        if(citiesList.length == 0)
+            setTimeout(()=>{
+            manageSearch(Array.from(document.getElementById('cities-list').children)[0].id);
+            },500);
+        else
+            manageSearch(citiesList[0].id);
+    } else
+        manageSearch(optionObj.id);
+}
+
+async function manageSearch(place_id, lat, lon){
+    Current_Place_Id = place_id;
+    let detailData = place_id == null ? null : await getPlaceGoogleDetails(place_id);
+    let latitude = place_id ? detailData.result.geometry.location.lat : lat;
+    let longitude = place_id ? detailData.result.geometry.location.lng : lon;
+    let weatherData = await getAPIweatherData(latitude, longitude);
+    console.log(detailData);
+    console.log(weatherData);
+    displayWeather(detailData, weatherData);
 }
 
 function handlePosition(position) {
-    console.log("Latitude: " + position.coords.latitude + "Longitude: " + position.coords.longitude);
+    manageSearch(null, position.coords.latitude, position.coords.longitude);
 }
 
-async function weatherData(city) {
-    markStar(false);
-    const url = `https://api.openweathermap.org/data/2.5/weather?units=metric&q=${city}&appid=${WEATHER_API_KEY}`;
+async function getPlaceGoogleDetails(placeId){
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?placeid=${placeId}&key=${MAPS_API_KEY}`;
+
+    try {
+        const res = await fetch(url);
+        if(!res.ok) {
+            console.log("Response Error");
+            return;
+        }
+
+        return await res.json();
+    }
+    catch(error) {
+        console.error("Fetch Error:", error);
+    }
+}
+
+async function loadGoogleImage(referenceId){
+    const url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${referenceId}&key=${MAPS_API_KEY}`;
+    try {
+        const res = await fetch(url);
+        if(!res.ok) {
+            console.log("Response Error");
+            return;
+        }
+
+        const data = await res.blob();
+        console.log(data);
+        let imageUrl = URL.createObjectURL(data);
+        document.getElementById("").src = imageUrl;
+    }
+    catch(error) {
+        console.error("loadGoogleImage Error:", error);
+    }
+}
+
+async function googleAutoComplete(input){
+    const url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?fields=name&input=${input}&language=en&types=%28cities%29&key=${MAPS_API_KEY}`;
 
     try {
         const res = await fetch(url);
@@ -30,16 +105,41 @@ async function weatherData(city) {
         }
 
         const data = await res.json();
-        const cityName = document.getElementById('city-name');
-        cityName.innerText = city;
-        displayWeather(data)
+
+        let datalistObj = document.getElementById('cities-list');
+        datalistObj.childNodes = new Array();
+        for(let pred of data.predictions){
+            let option = document.createElement('option');
+            option.innerText = pred.description;
+            option.value = pred.description;
+            option.id = pred.place_id;
+            datalistObj.appendChild(option);
+        }
+
+    }
+    catch(error) {
+        console.error("googleAutoComplete Error:", error);
+    }
+}
+
+async function getAPIweatherData(lat, lon) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`;
+
+    try {
+        const res = await fetch(url);
+        if(!res.ok) {
+            console.log("Response Error");
+            return;
+        }
+
+        return await res.json();
     }
     catch(error) {
         console.error("Fetch Error:", error);
     }
 }
 
-function displayWeather(data) {
+function displayWeather(detailData, weatherData) {
     const CELSIUS_TEMP = '°C'
     const PERCENT = '%'
     const PRESSURE = 'ATM'
@@ -47,9 +147,9 @@ function displayWeather(data) {
     const cityTempElem = document.getElementById('city-temp');
     const weatherCard = document.querySelector('.weather-card')
 
-    const cityTemp = data.main.temp;
-    const condition = data.weather[0].main;
-    const iconCode = data.weather[0].icon;
+    const cityTemp = weatherData.main.temp;
+    const condition = weatherData.weather[0].main;
+    const iconCode = weatherData.weather[0].icon;
     const iconUrl = `http://openweathermap.org/img/w/${iconCode}.png`;
 
     const cityTempObj = document.getElementById('city-temp');
@@ -62,7 +162,8 @@ function displayWeather(data) {
     </div>
     `
 
-    cityNameElem.textContent = data.name;
+    if(cityNameElem.textContent == '')
+        cityNameElem.textContent = weatherData.name;
     cityTempElem.textContent = `${cityTemp} ${CELSIUS_TEMP}`
     weatherCard.innerHTML = details;
 
@@ -74,11 +175,10 @@ function displayWeather(data) {
         temp_min:  CELSIUS_TEMP
     };
     for(let stat in statList){
-        console.log(stat);
         const pElement = document.createElement('p');
         const bElement = document.createElement('b');
         bElement.innerText = stat.replace('_',' ') + ' :';
-        pElement.innerText = `${data.main[stat]} ${statList[stat]}`;
+        pElement.innerText = `${weatherData.main[stat]} ${statList[stat]}`;
         pElement.insertBefore(bElement, pElement.firstChild);
         weatherCard.appendChild(pElement);
     }
@@ -89,7 +189,9 @@ function handleChangeCity(){
     let favoriteSelect = document.getElementById('favorite-cities');
     const cityName = document.getElementById('city-name');
     cityName.innerText = favoriteSelect.value;
+    let cityObj = localStorage.getItem(favoriteSelect.value);
     markStar(true);
+    manageSearch(cityObj);
 }
 
 function markStar(status){
@@ -102,7 +204,7 @@ function markStar(status){
 
 function removeCity(cityName){
     let favoriteSelect = document.getElementById('favorite-cities');
-    FavoriteList.splice(FavoriteList.indexOf(cityName),1);
+    localStorage.removeItem(cityName);
     Array.from(favoriteSelect.children).find((x) => x.innerText === cityName).remove();
     favoriteSelect.selectedIndex = 0;
     markStar(false);
@@ -110,8 +212,8 @@ function removeCity(cityName){
 
 function addCity(cityName){
     let favoriteSelect = document.getElementById('favorite-cities');
-    if(FavoriteList.indexOf(cityName) == -1){
-        FavoriteList.push(cityName);
+    if(localStorage.getItem(cityName) == undefined){
+        localStorage.setItem(cityName, Current_Place_Id);
         let favoriteOption = document.createElement('option');
         favoriteOption.value = cityName;
         favoriteOption.innerText = cityName;
@@ -123,7 +225,7 @@ function addCity(cityName){
 
 function handleLikeButton(){
     const cityName = document.getElementById('city-name').innerText;
-    if(FavoriteList.indexOf(cityName) == -1)
+    if(localStorage.getItem(cityName) == undefined)
         addCity(cityName);
     else
         removeCity(cityName);
