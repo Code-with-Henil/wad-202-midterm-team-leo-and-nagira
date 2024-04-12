@@ -45,18 +45,26 @@ main section.hour-range .hour-card {
 main section.current-weather {
   flex-direction: column;
   align-items: center;
+  background: #000;
+  color: #FFF;
 }
 main section.current-weather div.header {
   display: flex;
 }
-main section.current-weather div.header object {
+main section.current-weather div.header .btn {
   margin-left: 10px;
 }
 main section.current-weather div.weather-card {
-  background-color: #767676;
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(118, 118, 118, 0.2470588235);
+  border-radius: 10px;
   padding: 20px;
   width: 50vw;
-  height: 30vh;
+}
+main section.current-weather div.weather-card p {
+  display: flex;
+  justify-content: space-between;
 }
 main div.filter-search {
   display: flex;
