@@ -36,6 +36,7 @@ main section.daily-forecast .day-card {
 }
 main section.hour-range {
   justify-content: space-evenly;
+  flex-wrap: wrap;
 }
 main section.hour-range .hour-card {
   padding: 5vh 5vw;
@@ -88,9 +89,6 @@ main div.filter-search input, main div.filter-search select {
   section.current-weather div.weather-card {
     width: 100% !important;
     height: 30vh !important;
-  }
-  section.hour-range {
-    flex-wrap: wrap;
   }
 }
 
