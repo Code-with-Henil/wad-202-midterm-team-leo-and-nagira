@@ -49,9 +49,11 @@ async function manageSearch(place_id, lat, lon){
     let latitude = place_id ? detailData.result.geometry.location.lat : lat;
     let longitude = place_id ? detailData.result.geometry.location.lng : lon;
     let weatherData = await getAPIweatherData(latitude, longitude);
+    let daysForecastData = await getAPIdaysForecase(latitude, longitude);
     console.log(detailData);
     console.log(weatherData);
     displayWeather(detailData, weatherData);
+    displayDailyForecast(daysForecastData);
 }
 
 function handlePosition(position) {
@@ -231,3 +233,56 @@ function handleLikeButton(){
         removeCity(cityName);
 }
 
+async function getAPIdaysForecase(lat, lon) {
+    
+    const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`;
+
+    try {
+        const res = await fetch(url);
+        if (!res.ok) {
+            console.log("Response Error");
+            return;
+        }
+        
+        return await res.json();
+    } catch (error) {
+        console.error("Fetch Error:", error);
+    }
+}
+
+
+function displayDailyForecast(weatherDaysData) {
+    const CELSIUS_TEMP = '°C'
+
+    const forecastElem = document.getElementById('daily-forecast');
+    forecastElem.innerHTML = ''; 
+
+    const today = new Date();
+    const todayIndex = today.getDay();
+
+    for (let i = 0; i < 5; i++) {
+        const day = weatherDaysData.list[i];
+        if (day && day.weather && day.weather.length > 0 && day.main) {
+            const date = new Date(today);
+            date.setDate(today.getDate() + i);
+            const dayOfWeek = date.toLocaleDateString('en-Us', {weekday: 'long'});
+            const weatherIcon = day.weather[0].icon;
+            const weekIcon = `http://openweathermap.org/img/w/${weatherIcon}.png`;
+            const description = day.weather[0].description;
+            const maxTemp = day.main.temp_max;
+            const minTemp = day.main.temp_min;
+
+            const dayElem = document.createElement(`div`);
+            dayElem.classList.add('day-card');
+
+            dayElem.innerHTML = `
+               <p class="day-of-week">${dayOfWeek}</p>
+               <img src="${weekIcon}" alt="${description}">
+               <p> ${description}</p>
+               <p>Max: ${maxTemp} ${CELSIUS_TEMP} / Min: ${minTemp} ${CELSIUS_TEMP}</p>
+            `;
+
+            forecastElem.appendChild(dayElem);
+        }
+    }
+}
