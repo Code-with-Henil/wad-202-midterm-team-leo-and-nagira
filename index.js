@@ -273,7 +273,7 @@ function displayDailyForecast(weatherDaysData) {
             const minTemp = day.main.temp_min;
 
             const dayElem = document.createElement(`div`);
-            dayElem.classList.add('day-card');
+            dayElem.classList.add('hour-card');
 
             dayElem.innerHTML = `
                <p class="day-of-week">${dayOfWeek}</p>
@@ -288,168 +288,44 @@ function displayDailyForecast(weatherDaysData) {
 }
 
 
-//3hour-range
+
+function fetchWeatherData(hourCardId) {
+
+    const apiKey = '7580fc23fe1e90bf9284522f40ed7c07';
 
 
-async function getAPIweatherData(lat, lon) {
-  const url = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=London&appid=${apiKey}`;
 
-  try {
-      const res = await fetch(url);
-      if(!res.ok) {
-          console.log("Response Error");
-          return;
-      }
-
-      return await res.json();
-  }
-  catch(error) {
-      console.error("Fetch Error:", error);
-  }
-}
-
-function displayWeather(detailData, weatherData) {
-  const CELSIUS_TEMP = '°C'
-  const PERCENT = '%'
-  const PRESSURE = 'ATM'
-  const cityNameElem = document.getElementById('city-name');
-  const cityTempElem = document.getElementById('city-temp');
-  const weatherCard = document.querySelector('.weather-card')
-
-  const cityTemp = weatherData.main.temp;
-  const condition = weatherData.weather[0].main;
-  const iconCode = weatherData.weather[0].icon;
-  const iconUrl = `http://openweathermap.org/img/w/${iconCode}.png`;
-
-  const cityTempObj = document.getElementById('city-temp');
-  cityTempObj.innerText = `${cityTemp} ${CELSIUS_TEMP}`
   
-  const details = `
-  <div class="weather-details">
-      <p>${condition}</p>
-      <img src="${iconUrl}" alt="${condition}" />
-  </div>
-  `
+    fetch(apiUrl)
+        .then(response => {
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            
+            const weatherInfo = `Temperature: ${data.main.temp}°C, Weather: ${data.weather[0].description}`;
 
-  if(cityNameElem.textContent == '')
-      cityNameElem.textContent = weatherData.name;
-  cityTempElem.textContent = `${cityTemp} ${CELSIUS_TEMP}`
-  weatherCard.innerHTML = details;
-
-  let statList = {
-      feels_like: CELSIUS_TEMP,
-      humidity:  PERCENT,
-      pressure:  PRESSURE,
-      temp_max:  CELSIUS_TEMP,
-      temp_min:  CELSIUS_TEMP
-  };
-  for(let stat in statList){
-      const pElement = document.createElement('p');
-      const bElement = document.createElement('b');
-      bElement.innerText = stat.replace('_',' ') + ' :';
-      pElement.innerText = `${weatherData.main[stat]} ${statList[stat]}`;
-      pElement.insertBefore(bElement, pElement.firstChild);
-      weatherCard.appendChild(pElement);
-  }
+ 
+            const hourCard = document.getElementById(hourCardId);
+            const weatherInfoDiv = hourCard.querySelector('.weather-info');
+            weatherInfoDiv.textContent = weatherInfo;
+        })
+        .catch(error => {
+            console.error('Error fetching weather data:', error);
+            const hourCard = document.getElementById(hourCardId);
+            const weatherInfoDiv = hourCard.querySelector('.weather-info');
+            weatherInfoDiv.textContent = 'Failed to fetch weather data';
+        });
 }
 
 
-function handleChangeCity(){
-  let favoriteSelect = document.getElementById('favorite-cities');
-  const cityName = document.getElementById('city-name');
-  cityName.innerText = favoriteSelect.value;
-  let cityObj = localStorage.getItem(favoriteSelect.value);
-  markStar(true);
-  manageSearch(cityObj);
-}
-
-function markStar(status){
-  let imgObj = document.getElementById('star').children[0];
-  if(status)
-      imgObj.src = "StarMarked.svg";
-  else
-      imgObj.src = "StarEmpty.svg";
-}
-
-function removeCity(cityName){
-  let favoriteSelect = document.getElementById('favorite-cities');
-  localStorage.removeItem(cityName);
-  Array.from(favoriteSelect.children).find((x) => x.innerText === cityName).remove();
-  favoriteSelect.selectedIndex = 0;
-  markStar(false);
-}
-
-function addCity(cityName){
-  let favoriteSelect = document.getElementById('favorite-cities');
-  if(localStorage.getItem(cityName) == undefined){
-      localStorage.setItem(cityName, Current_Place_Id);
-      let favoriteOption = document.createElement('option');
-      favoriteOption.value = cityName;
-      favoriteOption.innerText = cityName;
-      favoriteSelect.appendChild(favoriteOption);
-  }
-  favoriteSelect.value = cityName;
-  markStar(true);
-}
-
-function handleLikeButton(){
-  const cityName = document.getElementById('city-name').innerText;
-  if(localStorage.getItem(cityName) == undefined)
-      addCity(cityName);
-  else
-      removeCity(cityName);
-}
-
-async function getAPIdaysForecase(lat, lon) {
-  
-  const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${WEATHER_API_KEY}&units=metric`;
-
-  try {
-      const res = await fetch(url);
-      if (!res.ok) {
-          console.log("Response Error");
-          return;
-      }
-      
-      return await res.json();
-  } catch (error) {
-      console.error("Fetch Error:", error);
-  }
-}
+fetchWeatherData('hour-card-1');
+fetchWeatherData('hour-card-2');
+fetchWeatherData('hour-card-3');
+fetchWeatherData('hour-card-4');
 
 
-function displayDailyForecast(weatherDaysData) {
-  const CELSIUS_TEMP = '°C'
-
-  const forecastElem = document.getElementById('daily-forecast');
-  forecastElem.innerHTML = ''; 
-
-  const today = new Date();
-  const todayIndex = today.getDay();
-
-  for (let i = 0; i < 5; i++) {
-      const day = weatherDaysData.list[i];
-      if (day && day.weather && day.weather.length > 0 && day.main) {
-          const date = new Date(today);
-          date.setDate(today.getDate() + i);
-          const dayOfWeek = date.toLocaleDateString('en-Us', {weekday: 'long'});
-          const weatherIcon = day.weather[0].icon;
-          const weekIcon = `http://openweathermap.org/img/w/${weatherIcon}.png`;
-          const description = day.weather[0].description;
-          const maxTemp = day.main.temp_max;
-          const minTemp = day.main.temp_min;
-
-          const dayElem = document.createElement(`div`);
-          dayElem.classList.add('day-card');
-
-          dayElem.innerHTML = `
-             <p class="day-of-week">${dayOfWeek}</p>
-             <img src="${weekIcon}" alt="${description}">
-             <p> ${description}</p>
-             <p>Max: ${maxTemp} ${CELSIUS_TEMP} / Min: ${minTemp} ${CELSIUS_TEMP}</p>
-          `;
-
-          forecastElem.appendChild(dayElem);
-      }
-  }
-}
